@@ -12,7 +12,7 @@ class custonCache<Key: Hashable, Value> {
 }
 
 // 198. 打家劫舍
-var money = [1,2,3,1]
+var money = [1, 2, 3, 1]
 // V0:回溯法，会超时
 func rob_HuiSu(_ nums: [Int]) -> Int {
     func dfs(_ i: Int) -> Int {
@@ -28,14 +28,14 @@ func rob_cacheSearch(_ nums: [Int]) -> Int {
     var len = nums.count
     var cache = Array(repeating: -1, count: len)  // 数组的构造器的写法
     func dfs(_ i: Int) -> Int {
-        if i < 0 { // 归
+        if i < 0 {  // 归
             return 0
         }
-        if cache[i] != -1 { // 查缓存
+        if cache[i] != -1 {  // 查缓存
             return cache[i]
         }
-        var res = max(dfs(i - 2) + nums[i], dfs(i - 1)) // 递
-        cache[i] = res // 存缓存
+        var res = max(dfs(i - 2) + nums[i], dfs(i - 1))  // 递
+        cache[i] = res  // 存缓存
         return res
     }
     return dfs(len - 1)
@@ -46,7 +46,7 @@ rob_cacheSearch(money)
 // 实操:把dfs改成数组、把递归改成循环
 func rob_DiTui(_ nums: [Int]) -> Int {
     var n = nums.count
-    var f = Array(repeating: 0, count: n + 2) // 数组记录各轮的值
+    var f = Array(repeating: 0, count: n + 2)  // 数组记录各轮的值
     for (i, x) in nums.enumerated() {
         f[i + 2] = max(f[i + 1], f[i] + x)
     }
@@ -56,10 +56,10 @@ rob_DiTui(money)
 
 // V3:递推，因为计算每个节点值的时候只需要知道它的上一个节点和上上一个节点的值，所以无需开个数组存以前所有值，用3个遍历即可解决问题！空间复杂度从O(n)降到O(1).
 func rob_O1(_ nums: [Int]) -> Int {
-    var ppre = 0 // 上上一个节点的值
-    var pre = 0 // 上一个节点的值
-    var new_f = 0 // 当前值
-    for i in nums { // 语法问题：i是nums[i]啊！如果写成0..<nums.count，for内部需要写nums[i]
+    var ppre = 0  // 上上一个节点的值
+    var pre = 0  // 上一个节点的值
+    var new_f = 0  // 当前值
+    for i in nums {  // 语法问题：i是nums[i]啊！如果写成0..<nums.count，for内部需要写nums[i]
         new_f = max(ppre + i, pre)
         ppre = pre
         pre = new_f
@@ -71,16 +71,17 @@ rob_O1(money)
 // 0-1背包
 func zero_one_pack(capacity: Int, w: [Int], v: [Int]) -> Int {
     var n = w.count
-    var cache:[[Int]] = Array(repeating: Array(repeating: -1, count: capacity), count: n)
+    var cache: [[Int]] = Array(
+        repeating: Array(repeating: -1, count: capacity), count: n)
     func dfs(_ i: Int, _ c: Int) -> Int {
         if i < 0 {
             return 0
         }
         if c < w[i] {
-            if cache[i-1][c] == -1 {
-                cache[i-1][c] = dfs(i - 1, c)
+            if cache[i - 1][c] == -1 {
+                cache[i - 1][c] = dfs(i - 1, c)
             }
-            return cache[i-1][c]
+            return cache[i - 1][c]
         }
         return max(dfs(i - 1, c), dfs(i - 1, c - w[i]) + v[i])
     }
@@ -89,20 +90,20 @@ func zero_one_pack(capacity: Int, w: [Int], v: [Int]) -> Int {
 
 // 494. 目标和 递归
 func findTargetSumWays(_ nums: [Int], _ target: Int) -> Int {
-    var t = target + nums.reduce(0, +) // 求结果的数学公式
-    if t % 2 != 0 || t < 0 { // 首先排除非法情况
+    var t = target + nums.reduce(0, +)  // 求结果的数学公式
+    if t % 2 != 0 || t < 0 {  // 首先排除非法情况
         return 0
     }
     t /= 2
     func dfs(i: Int, c: Int) -> Int {
-        if i < 0 { // 归
+        if i < 0 {  // 归
             if c == 0 {
                 return 1  // 说明这条路合法，方案数+1
             } else {
                 return 0  // 这条路不合法，方案数不变
             }
         }
-        if c < nums[i] { // 递
+        if c < nums[i] {  // 递
             return dfs(i: i - 1, c: c)
         } else {
             return dfs(i: i - 1, c: c - nums[i]) + dfs(i: i - 1, c: c)

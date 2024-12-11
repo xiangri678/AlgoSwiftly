@@ -102,7 +102,8 @@ func combine2(_ n: Int, _ k: Int) -> [[Int]] {
         if i < d { return }
         if path.count == k {
             ans.append(path)
-            return }
+            return
+        }
 
         for j in (d...i).reversed() {
             path.append(j)
@@ -114,6 +115,5 @@ func combine2(_ n: Int, _ k: Int) -> [[Int]] {
 
     return ans
 }
-
 
 //: [Next](@next)
