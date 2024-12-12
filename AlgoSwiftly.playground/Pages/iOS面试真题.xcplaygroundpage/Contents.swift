@@ -1,62 +1,65 @@
 //: [Previous](@previous)
 
 import Foundation
+import UIKit
 
-// 493. 翻转对
-//func reversePair(_ nums: [Int]) -> Int {
-//    var nums=nums
-//    return mergeSort(&nums, 0, nums.count-1)
-//}
-//
-//func mergeSort(_ nums: inout [Int], _ start: Int, _ end: Int) -> Int {
-//    if start >= end { return 0 }
-//    var mid = (start + end)/2
-//    var count = mergeSort(&nums, start, mid) + mergeSort(&nums, mid+1, end-1)
-//
-//    var j = mid+1
-//    for i in 0..<mid{
-//        while j<=end && nums[i]>2*nums[j]{
-//            j+=1
-//        }
-//        count+=(j-mid-1)
-//    }
-//    nums[start...end] = nums[start...mid].sorted() + nums[mid+1...end].sorted()
-//
-//    return count
-//}
-
-//func reversePairs(_ nums: [Int]) -> Int {
-//    var nums = nums
-//    return mergeSort(&nums, 0, nums.count - 1)
-//}
-//
-//func mergeSort(_ nums: inout [Int], _ start: Int, _ end: Int) -> Int {
-//    if start >= end { return 0 }
-//    let mid = (start + end) / 2
-//    var count = mergeSort(&nums, start, mid) + mergeSort(&nums, mid + 1, end)
-//
-//    var j = mid + 1
-//    for i in start...mid {
-//        while j <= end && nums[i] > 2 * nums[j] {
-//            j += 1
-//        }
-//        count += (j - mid - 1)
-//        print("i=\(i), j=\(j), start=\(start), mid=\(mid), end=\(end), count=\(count), nums=\(nums)")
-//    }
-//    nums.replaceSubrange(start...end, with: (nums[start...mid].sorted() + nums[mid+1...end].sorted()))
-//
-//    return count
-//}
-//
-//// 测试
-//print(reversePairs([1, 3, 2, 3, 1])) // 输出: 2
-
-func reversePairs(_ nums: [Int]) -> Int {
-    var nums = nums
-    return mergeSort(&nums, 0, nums.count - 1)
+// 单链表定义
+public class ListNode {
+    public var val: Int
+    public var next: ListNode?
+    public init() {
+        self.val = 0
+        self.next = nil
+    }
+    public init(_ val: Int) {
+        self.val = val
+        self.next = nil
+    }
+    public init(_ val: Int, _ next: ListNode?) {
+        self.val = val
+        self.next = next
+    }
 }
 
+// 树节点定义
+class TreeNode {
+    var val: Int
+    var left: TreeNode?
+    var right: TreeNode?
+    init(_ val: Int) {
+        self.val = val
+        self.left = nil
+        self.right = nil
+    }
+}
+
+// 493. 翻转对
+func reversePair(_ nums: [Int]) -> Int {
+    var nums=nums
+    return mergeSort(&nums, 0, nums.count-1)
+}
+//print(reversePair([1, 3, 2, 3, 1])) // 输出: 2
+
+// 归并排序
 func mergeSort(_ nums: inout [Int], _ start: Int, _ end: Int) -> Int {
+    if start >= end { return 0 }
+    let mid = (start + end) / 2
+    var count = mergeSort(&nums, start, mid) + mergeSort(&nums, mid + 1, end)
+
+    var j = mid + 1
+    for i in start...mid {
+        while j <= end && nums[i] > 2 * nums[j] {
+            j += 1
+        }
+        count += (j - mid - 1)
+        print("i=\(i), j=\(j), start=\(start), mid=\(mid), end=\(end), count=\(count), nums=\(nums)")
+    }
+    nums.replaceSubrange(start...end, with: (nums[start...mid].sorted() + nums[mid+1...end].sorted()))
+
+    return count
+}
+
+func mergeSort2(_ nums: inout [Int], _ start: Int, _ end: Int) -> Int {
     if start >= end { return 0 }
     let mid = (start + end) / 2
     var count = mergeSort(&nums, start, mid) + mergeSort(&nums, mid + 1, end)
@@ -103,11 +106,111 @@ func mergeSort(_ nums: inout [Int], _ start: Int, _ end: Int) -> Int {
 }
 
 // 测试
-var nums = [1, 3, 2, 3, 1]
+//var nums = [1, 3, 2, 3, 1]
 //print(reversePairs(nums))  // 输出: 2
 //print(nums)  // 修改后的 nums：[1, 1, 2, 3, 3]
 
-// 最大子串和
+// 25. K 个一组翻转链表
+func reverseKGroup(_ head: ListNode?, _ k: Int) -> ListNode? {
+    let dummy = ListNode(0, head)
+    var len = 0
+    var nxt: ListNode? = nil
+    var pre: ListNode? = nil
+    var cur: ListNode? = dummy.next
+    var p0: ListNode? = dummy
+    while cur != nil {
+        len += 1
+        cur = cur?.next
+    }
+    cur = dummy.next
+    while len >= k {
+        len -= k
+        for _ in 0..<k {
+            nxt = cur?.next
+            cur?.next = pre
+            pre = cur
+            cur = nxt
+        }
+        nxt = p0?.next
+        p0?.next?.next = cur
+        p0?.next = pre
+        p0 = nxt
+    }
+    return dummy.next
+}
+
+// 92. 反转链表 II
+func reverseBetween(_ head: ListNode?, _ left: Int, _ right: Int) -> ListNode? {
+    guard let head = head else { return nil }
+    var dummyNode = ListNode(-1, head)
+    var p0: ListNode? = dummyNode
+    var pre: ListNode?
+    var cur: ListNode?
+    var nxt: ListNode?
+    for _ in 1..<left {// p0是反转区的前一个节点，记下来连接反转的段
+        p0 = p0?.next
+    }
+    cur = p0?.next
+    pre = p0
+    for _ in 1...right - left + 1 {
+        nxt = cur?.next
+        cur?.next = pre
+        pre = cur
+        cur = nxt
+    }
+    p0?.next?.next = cur
+    p0?.next = pre
+    return dummyNode.next
+}
+
+// 206. 反转链表
+func reverseList(_ head: ListNode?) -> ListNode? {
+    var pre: ListNode? = nil
+    var cur = head
+    var nxt: ListNode? = nil
+    while cur != nil {
+        nxt = cur?.next
+        cur?.next = pre
+        pre = cur
+        cur = nxt
+    }
+    return pre
+}
+
+// 寻找2个视图最近的父视图
+@MainActor
+func neareatFather(_ view1: UIView?, _ view2: UIView?) -> UIView? {
+    var ancestors = Set<UIView>()
+    var curView: UIView? = view1
+    while curView != nil {
+        if let pa = curView?.superview {
+            ancestors.insert(pa)
+            curView = pa
+        }
+    }
+
+    curView = view2
+    while let view = curView {
+        if ancestors.contains(view) {
+            return curView
+        } else {
+            curView = curView?.superview
+        }
+    }
+    return nil
+}
+
+// 倒序数组
+func reverseArray(_ nums: inout [Int]) {
+    nums.reverse()
+}
+// 测试
+//var array = [1, 2, 3, 4, 5]
+//reverseArray(&array)
+//print(array) // 输出: [5, 4, 3, 2, 1]
+
+
+// 最大子串和：找到连续子数组的最大和
 func maxSubArraySum(_ nums: [Int]) -> Int {
     var maxSum = nums[0]
     var curSum = nums[0]
@@ -259,6 +362,77 @@ func countSubHuiwen(_ str: String) -> Int {
 }
 //countSubHuiwen("abcddcefft")
 
+// 翻转二叉树
+func invertTree(_ root: TreeNode?) -> TreeNode? {
+    guard let root = root else { return nil }
+    let temp = root.left
+    root.left = invertTree(root.right)
+    root.right = invertTree(temp)
+    return root
+}
+
+//  约瑟夫环问题，朴素递推法
+func josephusRound_DiTui(_ num: Int, _ m: Int) -> Int {
+    var round = Array(0..<num)
+    var index = 0
+    while round.count>1{
+        index = (index+m-1)%round.count
+        round.remove(at: index)
+    }
+    return round[0]
+}
+//josephusRound_DiTui(6, 4)
+
+//  约瑟夫环问题，公式法
+func josephusUsingFoormula(_ num: Int, _ m: Int) -> Int {
+    var res = 0
+    for i in 2...num {
+        res = (res + m) % i
+    }
+    return res
+}
+//josephusUsingFoormula(6, 4)
+
+// 103. 二叉树的锯齿形层序遍历
+func zigzagLevelOrder(_ root: TreeNode?) -> [[Int]] {
+    guard let root = root else { return [] } //  这样一来后续的nodeQueue是非可选类型的数组了
+    var ans: [[Int]] = []
+    var queue: ArraySlice = [root]
+    var isEvenLevel = false
+    while !queue.isEmpty {
+        var curVals: [Int] = []
+        for _ in 0..<queue.count {
+            if let item = queue.popFirst() {
+                curVals.append(item.val)
+                if let left = item.left { queue.append(left) }
+                if let right = item.right { queue.append(right) }
+            }
+        }
+        ans.append(isEvenLevel ? curVals.reversed() : curVals)
+        isEvenLevel.toggle()
+    }
+    return ans
+}
+
+// 二叉搜索树寻找第K大数
+func kBig(_ root: TreeNode?, _ k: Int) -> Int {
+    guard let root = root else { return -1 }
+    var ans: [Int] = []
+    midTranverse(root)
+
+    func midTranverse(_ root: TreeNode) {
+        if let left = root.left {
+            midTranverse(left)
+        }
+        ans.append(root.val)
+        if let right = root.right {
+            midTranverse(right)
+        }
+    }
+    return ans[k-1]
+}
+//kBig(root, 5) // 需提供根节点再运行
+
 // 1. 两数之和
 func twoSum(_ nums: [Int], _ target: Int) -> [Int] {
     var numMap = [Int: Int]()
@@ -273,7 +447,7 @@ func twoSum(_ nums: [Int], _ target: Int) -> [Int] {
 }
 //twoSum([2, 6, 7, 9, 9], 10)
 
-// 求k数
+// 求k数，找到数组中满足：左侧元素都小于它，右侧都大于它的元素
 let knums = [1, 3, 2, 4, 5, 6]
 func findKNumbers(_ nums: [Int]) -> [Int] {
     let n = nums.count
@@ -294,6 +468,20 @@ func findKNumbers(_ nums: [Int]) -> [Int] {
     return ans
 }
 //findKNumbers(knums)
+
+// 141. 环形链表
+func hasCycle(_ head: ListNode?) -> Bool {
+    var fast = head
+    var slow = head
+    while (fast != nil) && ((fast?.next) != nil) {
+        slow = slow?.next
+        fast = fast?.next?.next
+        if fast === slow {
+            return true
+        }
+    }
+    return false
+}
 
 // 斐波那契，递归
 func fibcache(_ n: Int) {
@@ -317,6 +505,7 @@ func fibcache(_ n: Int) {
 func reverseStr(_ str: String) -> String {
     return String(str.reversed())
 }
+
 // 字符串回文
 func strhuiwen(_ str: String) -> Bool {
     var chars = Array(str)
@@ -328,6 +517,26 @@ func strhuiwen(_ str: String) -> Bool {
     }
     return true
 }
+
+// 二分查找
+func binarySearch(_ nums: [Int], _ target: Int) -> Int {
+    var low = 0
+    var high = nums.count - 1
+    var mid: Int
+    while low <= high {
+        mid = (low + high) / 2
+        if nums[mid] == target {
+            return mid
+        } else if nums[mid] < target {
+            low = mid + 1
+        } else {
+            high = mid - 1
+        }
+    }
+    return -1
+}
+//erfenchazhao([1, 3, 5, 7, 9], 5)
+
 // 合并有序数组
 func conbineArrs(_ arr1: [Int], _ arr2: [Int]) -> [Int] {
     var p1 = 0
@@ -400,4 +609,23 @@ func bbs<T: Comparable>(_ array: [T]) -> [T] {
     }
     return arr
 }
-//: [Next](@next)
+
+// 41.缺失的第一个正整数，但不要求O(1)空间复杂度
+// 小红书真题
+func minPositive(_ nums: [Int]) -> Int {
+    var n = nums.count
+    var dict = Array(repeating: false, count: n + 1)
+    dict[0] = true
+    for i in 0..<n {
+        if nums[i] < n && nums[i] > 0{
+            dict[nums[i]] = true
+        }
+    }
+    for (index, i) in dict.enumerated() {
+        if i == false {
+            return index
+        }
+    }
+    return n + 1
+}
+//minPositive([3,4,-1,-1])
