@@ -171,3 +171,35 @@ func longestCommonSubsequence2(_ text1: String, _ text2: String) -> Int {
 }
 
 // 1143.V2
+
+// 122. 买卖股票的最佳时机 II(无限次，无冷冻期)
+var prices = [7,1,5,3,6,4]
+// V0 递归版
+func maxProfit_recursion(_ prices: [Int]) -> Int {
+    var n = prices.count
+    func dfs(_ i: Int, _ hold: Bool) -> Int {
+        if i < 0 { // 归，最开始如果持有股票非法，所以返回 Int.min ，在后期max函数筛选时就自动去掉了
+            return hold ? Int.min : 0
+        }
+        return hold
+            ? max(dfs(i - 1, true), dfs(i - 1, false) - prices[i])
+            : max(dfs(i - 1, false), dfs(i - 1, true) + prices[i]) // 递
+    }
+    return dfs(n - 1, false) // 从后往前推
+}
+//maxProfit_recursion(prices)
+
+// V1 递推版
+func maxProfit_recurrence(_ prices: [Int]) -> Int {
+    var n=prices.count
+    var cache = Array(repeating: Array(repeating: 0, count: 2), count: n+1) // 存储所有状态，这肯定比递归来的快、内存小
+    cache[0][1]=Int.min
+    for (i, price) in prices.enumerated() {
+        cache[i+1][0] = max(cache[i][0],cache[i][1]+price)
+        cache[i+1][1] = max(cache[i][1],cache[i][0]-price)
+    }
+    return cache[n][0]
+}
+//maxProfit_recurrence(prices)
+
+// V2 优化空间
