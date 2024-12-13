@@ -14,14 +14,14 @@ class custonCache<Key: Hashable, Value> {
 // 198. 打家劫舍
 var money = [1, 2, 3, 1]
 // V0:回溯法，会超时
-func rob_HuiSu(_ nums: [Int]) -> Int {
+func rob_recursion(_ nums: [Int]) -> Int {
     func dfs(_ i: Int) -> Int {
         if i < 0 { return 0 }  // 归
         return max(dfs(i - 1), dfs(i - 2) + nums[i])  // 递
     }
     return dfs(nums.count - 1)
 }
-rob_HuiSu(money)
+//rob_recursion(money)
 
 // V1:记忆化搜索，仍然是自顶向下算，但是用一个cache数组记录已求过的节点，取消重复计算。每个节点只算一次，故O(n)
 func rob_cacheSearch(_ nums: [Int]) -> Int {
@@ -40,11 +40,11 @@ func rob_cacheSearch(_ nums: [Int]) -> Int {
     }
     return dfs(len - 1)
 }
-rob_cacheSearch(money)
+//rob_cacheSearch(money)
 
 // V2:递推，因为已知哪些节点要递归到哪个节点，所以无需真的递归，而是可以直接自底向上计算
 // 实操:把dfs改成数组、把递归改成循环
-func rob_DiTui(_ nums: [Int]) -> Int {
+func rob_recurrence(_ nums: [Int]) -> Int {
     var n = nums.count
     var f = Array(repeating: 0, count: n + 2)  // 数组记录各轮的值
     for (i, x) in nums.enumerated() {
@@ -52,7 +52,7 @@ func rob_DiTui(_ nums: [Int]) -> Int {
     }
     return f[n + 1]
 }
-rob_DiTui(money)
+//rob_recurrence(money)
 
 // V3:递推，因为计算每个节点值的时候只需要知道它的上一个节点和上上一个节点的值，所以无需开个数组存以前所有值，用3个遍历即可解决问题！空间复杂度从O(n)降到O(1).
 func rob_O1(_ nums: [Int]) -> Int {
@@ -66,7 +66,7 @@ func rob_O1(_ nums: [Int]) -> Int {
     }
     return pre
 }
-rob_O1(money)
+//rob_O1(money)
 
 // 0-1背包
 func zero_one_pack(capacity: Int, w: [Int], v: [Int]) -> Int {
@@ -173,33 +173,73 @@ func longestCommonSubsequence2(_ text1: String, _ text2: String) -> Int {
 // 1143.V2
 
 // 122. 买卖股票的最佳时机 II(无限次，无冷冻期)
-var prices = [7,1,5,3,6,4]
+var prices = [7, 1, 5, 3, 6, 4]
 // V0 递归版
 func maxProfit_recursion(_ prices: [Int]) -> Int {
     var n = prices.count
     func dfs(_ i: Int, _ hold: Bool) -> Int {
-        if i < 0 { // 归，最开始如果持有股票非法，所以返回 Int.min ，在后期max函数筛选时就自动去掉了
+        if i < 0 {  // 归，最开始如果持有股票非法，所以返回 Int.min ，在后期max函数筛选时就自动去掉了
             return hold ? Int.min : 0
         }
         return hold
             ? max(dfs(i - 1, true), dfs(i - 1, false) - prices[i])
-            : max(dfs(i - 1, false), dfs(i - 1, true) + prices[i]) // 递
+            : max(dfs(i - 1, false), dfs(i - 1, true) + prices[i])  // 递
     }
-    return dfs(n - 1, false) // 从后往前推
+    return dfs(n - 1, false)  // 从后往前推
 }
 //maxProfit_recursion(prices)
 
 // V1 递推版
 func maxProfit_recurrence(_ prices: [Int]) -> Int {
-    var n=prices.count
-    var cache = Array(repeating: Array(repeating: 0, count: 2), count: n+1) // 存储所有状态，这肯定比递归来的快、内存小
-    cache[0][1]=Int.min
-    for (i, price) in prices.enumerated() {
-        cache[i+1][0] = max(cache[i][0],cache[i][1]+price)
-        cache[i+1][1] = max(cache[i][1],cache[i][0]-price)
+    var n = prices.count
+    var cache = Array(repeating: Array(repeating: 0, count: 2), count: n + 1)  // 用二维数组存储所有状态，这肯定比递归来的快、内存小
+    cache[0][1] = Int.min  // 最开始如果持有股票非法，所以设为 Int.min ，在后期max函数筛选时就自动去掉了
+    for (i, price) in prices.enumerated() {  // 从前往后遍历
+        cache[i + 1][0] = max(cache[i][0], cache[i][1] + price)
+        cache[i + 1][1] = max(cache[i][1], cache[i][0] - price)
     }
     return cache[n][0]
 }
 //maxProfit_recurrence(prices)
 
-// V2 优化空间
+// V2 优化空间至O(1)
+// 因为计算cache[i+1]只会用到cache[i]，所以优化为只使用2个变量
+func maxProfit_O1(_ prices: [Int]) -> Int {
+    var pre = Int.min  // cache[i+1]
+    var ppre = 0  // cache[i]
+    var cur = 0  // 临时变量，否则算的时候把值冲掉了算不了结果
+    for price in prices {
+        cur = max(ppre, pre + price)
+        pre = max(pre, ppre - price)
+        ppre = cur
+    }
+    return cur
+}
+//maxProfit_O1(prices)
+
+// 309. 买卖股票的最佳时机含冷冻期
+// LC方法名仍为 maxProfit
+func maxProfit_froze_recursion(_ prices: [Int]) -> Int {
+    var n = prices.count
+    func dfs(_ i: Int, _ hold: Bool) -> Int {
+        if i < 0 {
+            return hold ? Int.min : 0
+        }
+        return hold
+            ? max(dfs(i - 1, true), dfs(i - 2, false) - prices[i])
+            : max(dfs(i - 1, false), dfs(i - 1, true) + prices[i])
+    }
+    return dfs(n, false)
+}
+
+// TODO:这个写法不对，请参照打家劫舍的思路再想一下，因为中途需要跳过一天
+func maxProfit_froze_recurrence(_ prices: [Int]) -> Int {
+    var n=prices.count
+    var cache = Array(repeating: Array(repeating: 0, count: n+1), count: 2)
+    cache[0][1]=Int.min
+    for (i, price) in prices.enumerated() {
+        cache[i+1][0] = max(cache[i][0], cache[i][1]-prices[i])
+        cache[i+1][1] = max(cache[i][1], cache[i][0]+prices[i])
+    }
+    return cache[n][0]
+}
