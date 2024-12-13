@@ -1,6 +1,8 @@
 # AlgoSwiftly
 Algorithm collection all in Swift and all swiftly!
 
+![image](https://github.com/xiangri678/AlgoSwiftly/blob/main/img/AlgoSwiftly_LOGO.jpg)
+
 ## Introduction
 
 Dive into the **AlgoSwiftly**—a meticulously organized repository showcasing foundational algorithms in Swift. Whether you're starting out or fine-tuning your expertise, this collection is crafted to be your go-to resource for algorithmic mastery.
