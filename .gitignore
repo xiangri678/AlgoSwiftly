@@ -60,3 +60,6 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# custom files
+AlgoSwiftly.playground/Pages/Practice.xcplaygroundpage
