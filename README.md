@@ -1,7 +1,13 @@
-# AlgoSwiftly
-Algorithm collection all in Swift and all swiftly!
+<p align="center">
+<img src="https://github.com/xiangri678/AlgoSwiftly/blob/main/img/AlgoSwiftly_LOGO.jpg" width="60%" alt="AlgoSwiftly Logo" />
+<br />
+<br />
+<img src="https://img.shields.io/badge/Swift-6.0-orange" alt="Swift V6.0" />
+<img src="https://img.shields.io/badge/Xcode-15.0-blue" alt="Xcode V15" />
+<img src="https://img.shields.io/badge/platforms-Universal-333333.svg" alt="Supported Platforms: Universal" />
+<br />
+</p>
 
-![image](https://github.com/xiangri678/AlgoSwiftly/blob/main/img/AlgoSwiftly_LOGO.jpg)
 
 ## Introduction
 
