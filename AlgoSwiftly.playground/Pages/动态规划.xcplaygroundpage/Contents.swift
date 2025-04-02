@@ -156,7 +156,7 @@ func findTargetSumWays3(_ nums: [Int], _ target: Int) -> Int {
     }
     return f[n][target]
 }
-findTargetSumWays3([1, 1, 1, 1, 1], 3)
+// findTargetSumWays3([1, 1, 1, 1, 1], 3)
 
 // 464. V4 递推，优化为只用1个数组的空间,倒退
 func findTargetSumWays4(_ nums: [Int], _ target: Int) -> Int {
@@ -174,7 +174,7 @@ func findTargetSumWays4(_ nums: [Int], _ target: Int) -> Int {
     }
     return f[target]
 }
-findTargetSumWays4([1, 1, 1, 1, 1], 3)
+// findTargetSumWays4([1, 1, 1, 1, 1], 3)
 
 // 1143. 最长公共子序列V0
 func longestCommonSubsequence(_ text1: String, _ text2: String) -> Int {
@@ -214,6 +214,73 @@ func longestCommonSubsequence2(_ text1: String, _ text2: String) -> Int {
 }
 
 // 1143.V2
+
+// 300. 最长递增子序列
+// 递归：dfs[i] = max{dfs[j]} + 1, j<i
+func lengthOfLIS_recurrence(_ nums: [Int]) -> Int {
+    let len = nums.count
+    var ans = 0
+    func dfs(_ i: Int) -> Int {
+        var curMax = 0
+        for j in 0..<i {
+            if nums[j] < nums[i] { 
+                curMax = max(curMax, dfs(j))
+            }
+        }
+        return curMax + 1
+        
+    }
+    for i in 0..<len {
+        ans = max(ans, dfs(i))
+    }
+    return ans
+}
+
+// 矩阵递推：f[i] = max{f[j]} + 1, j<i
+func lengthOfLIS_matrix(_ nums: [Int]) -> Int {
+    let len = nums.count
+    var f = Array(repeating: 0, count: len)
+    for i in 0..<len {
+        for j in 0..<i {
+            if nums[j] < nums[i] {
+                f[i] = max(f[i], f[j])
+            }
+        }
+        f[i] += 1 // 全部计算清楚后 别忘了再加 1
+    }
+
+    return f.max() ?? 0 // 取数组最大值的方法，解包
+}
+
+// 二分查找
+func bisectLeft(_ array: [Int], _ target: Int) -> Int {
+    var low = 0
+    var high = array.count
+    while low < high {
+        let mid = (low + high) / 2
+        if array[mid] < target {
+            low = mid + 1
+        } else {
+            high = mid
+        }
+    }
+    return low
+}
+// 交换状态与状态值的方法，贪心+二分
+func lengthOfLIS_gx(_ nums: [Int]) -> Int {
+    var g = [Int]()
+    for num in nums {
+        let j = bisectLeft(g, num)
+        if j == g.count {
+            g.append(num)
+        } else {
+            g[j] = num
+        }
+    }
+    return g.count
+}
+
+// print("ans = \(lengthOfLIS_gx([10,9,2,5,3,7,101,18]))")
 
 // 122. 买卖股票的最佳时机 II(无限次，无冷冻期)
 var prices = [7, 1, 5, 3, 6, 4]
@@ -341,3 +408,249 @@ func maxProfit_froze_recurrence(_ prices: [Int]) -> Int {
     }
     return cache[n][0]
 }
+
+// 516. 最长回文子序列
+func longestPalindromeSubseq_LCS(_ s: String) -> Int {
+    let rs = String(s.reversed())
+    return longestCommonSubsequence2(s, rs)
+}
+
+// dfs(l,r) = max(dfs(l+1,r), dfs(l,r-1))
+func longestPalindromeSubseq_dfs(_ s: String) -> Int {
+    let charsS = Array(s)
+    func dfs(_ l: Int, _ r: Int) -> Int {
+        if l < r {
+            if charsS[l] == charsS[r] {
+                return dfs(l+1,r-1) + 2
+            } else {
+                return max(dfs(l, r-1), dfs(l+1, r))
+            }
+        } else if l == r {
+            return 1
+        } else {
+            return 0
+        }
+    }
+    return dfs(0, s.count - 1)
+}
+
+// f[l][r] = max(f[l+1][r], f[l][r+1])
+func longestPalindromeSubseq_matrix(_ s: String) -> Int {
+    let len = s.count
+    let charsS = Array(s)
+    var f = Array(repeating: Array(repeating: 0, count: len), count: len)
+    for i in (0..<len).reversed() {
+        f[i][i] = 1
+        for j in i+1..<len {
+            if charsS[i] == charsS[j] {
+                f[i][j] = f[i + 1][j - 1] + 2
+            } else {
+                f[i][j] = max(f[i + 1][j], f[i][j - 1])
+            }
+        }
+    }
+    return f[0][len - 1]
+}
+
+// print(longestPalindromeSubseq_matrix("bbbab"))
+
+// 1039. 多边形三角剖分的最低得分
+// 法 1：递归
+func minScoreTriangulation_dfs(_ values: [Int]) -> Int {
+    let len = values.count
+    func dfs(_ i: Int, _ j: Int) -> Int {
+        if i + 1 == j {
+            return 0
+        }
+        var res = Int.max
+        for k in i + 1..<j {
+            res = min(res, dfs(i, k) + dfs(k, j) + values[i] * values[j] * values[k])
+        }
+        return res
+    }
+    return dfs(0, len - 1)
+}
+
+// 法 2：使用记忆化搜索优化的版本
+func minScoreTriangulation_memo(_ values: [Int]) -> Int {
+    let n = values.count
+    // 创建n×n的缓存数组，初始化为-1表示未计算
+    var memo = Array(repeating: Array(repeating: -1, count: n), count: n)
+    
+    func dfs(_ i: Int, _ j: Int) -> Int {
+        // 相邻顶点无法形成三角形
+        if i + 1 == j {
+            return 0
+        }
+        
+        // 如果已经计算过，直接返回缓存结果
+        if memo[i][j] != -1 {
+            return memo[i][j]
+        }
+        
+        var res = Int.max
+        // 枚举所有可能的三角形顶点k
+        for k in i + 1..<j {
+            res = min(res, dfs(i, k) + dfs(k, j) + values[i] * values[j] * values[k])
+        }
+        
+        // 存储结果到缓存
+        memo[i][j] = res
+        return res
+    }
+    
+    return dfs(0, n - 1)
+}
+
+// 法 3：递推
+func minScoreTriangulation_matrix(_ values: [Int]) -> Int {
+    let n = values.count
+    var f = Array(repeating: Array(repeating: 0, count: n), count: n)
+    for i in (0...n-3).reversed() { // 必须相差 2 才能形成三角形，i j 都是
+        for j in i+2..<n {
+            var res = Int.max
+            for k in i+1..<j {
+                res = min(res, f[i][k] + f[k][j] + values[i] * values[j] * values[k])
+                
+            }
+            f[i][j] = res
+        }
+    }
+    return f[0][n - 1]
+}
+// print(minScoreTriangulation_matrix([1,2,3]))
+
+// 543. 二叉树的直径
+//  Definition for a binary tree node.
+ public class TreeNode {
+     public var val: Int
+     public var left: TreeNode?
+     public var right: TreeNode?
+     public init() { self.val = 0; self.left = nil; self.right = nil; }
+     public init(_ val: Int) { self.val = val; self.left = nil; self.right = nil; }
+     public init(_ val: Int, _ left: TreeNode?, _ right: TreeNode?) {
+         self.val = val
+         self.left = left
+         self.right = right
+     }
+ }
+
+func createTree(_ nodeCount: Int) -> [TreeNode] {
+    // 先创建一个指定大小的数组
+    var nodesList = [TreeNode]()
+    
+    // 使用append添加节点
+    for i in 1...nodeCount {
+        nodesList.append(TreeNode(i))
+    }
+    
+    // 建立父子关系，注意检查索引边界
+    for i in 0..<nodeCount / 2 {
+        if 2 * i + 1 < nodeCount {
+            nodesList[i].left = nodesList[2 * i + 1]
+        }
+        if 2 * i + 2 < nodeCount {
+            nodesList[i].right = nodesList[2 * i + 2]
+        }
+    }
+    return nodesList
+}
+
+func diameterOfBinaryTree(_ root: TreeNode?) -> Int {
+    var ans = 0
+    func dfs(_ node: TreeNode?) -> Int {
+        if let node = node {
+            let l_len = dfs(node.left) + 1
+            let r_len = dfs(node.right) + 1
+            ans = max(ans, l_len + r_len)
+            return max(l_len, r_len)
+        } else {
+            return -1
+        }
+    }
+    dfs(root)
+    return ans
+}
+// print(diameterOfBinaryTree(createTree(5)[0]))
+
+func maxPathSum(_ root: TreeNode?) -> Int {
+    var ans = Int.min
+    func dfs(_ node: TreeNode?) -> Int {
+        if let node = node {
+            let l_len = dfs(node.left)
+            let r_len = dfs(node.right)
+            ans = max(ans, l_len + r_len + node.val)
+            return max(max(l_len, r_len) + node.val, 0) // 节点值可能为负数，而不要求必须经过根节点/叶子等，所以不保留 < 0 的cases
+        } else {
+            return 0
+        }
+    }
+    dfs(root)
+    return ans
+}
+// print(maxPathSum(createTree(3)[0]))
+
+// 2246. 相邻字符不同的最长路径
+func longestPath(_ parent: [Int], _ s: String) -> Int {
+    let len = s.count
+    let charS = Array(s)
+    var ans = 0
+    var children = Array(repeating: [Int](), count: len)
+    for i in 1..<len {
+        children[parent[i]].append(i) // 构建邻接表。因为parent[i]是i的父节点，所以使用邻接表构建每个节点的子节点，用于 dfs 遍历
+    }
+    func dfs(_ x: Int) -> Int {
+        var x_len = 0
+        for y in children[x] {
+            let y_len = dfs(y) + 1
+            if charS[x] != charS[y] { // 题目要求相邻节点字符不同
+                ans = max(ans, x_len + y_len) // 更新全局最长路径
+                x_len = max(x_len, y_len) // 更新当前节点的最长路径
+            }
+        }
+        return x_len
+    }
+     _ = dfs(0)
+    return ans + 1 // 因为dfs返回的是路径长度，所以需要加1
+}
+// print(longestPath([-1,0,0,1,1,2], "abacbe"))
+
+// 337. 打家劫舍 III
+func rob(_ root: TreeNode?) -> Int {
+    func dfs(_ node: TreeNode?) -> (Int, Int) { // 用元组做返回值，传递偷与不偷 2 种情况的答案
+        if let node = node {
+            let (left_rob, left_not_rob) = dfs(node.left)
+            let (right_rob, right_not_rob) = dfs(node.right)
+            return (left_not_rob + right_not_rob + node.val, max(left_rob, left_not_rob) + max(right_rob, right_not_rob))
+        } else {
+            return (0, 0)
+        }
+    }
+    let (rob, not_rob) = dfs(root)
+    return max(rob, not_rob)
+}
+
+// 968. 监控二叉树
+func minCameraCover(_ root: TreeNode?) -> Int {
+    func dfs(_ node: TreeNode?) -> (Int, Int, Int) {
+        guard let node = node else {
+            return (Int.max / 2, 0, 0)  // 防止溢出，使用Int.max/2
+        }
+        
+        let (l_choose, l_by_father, l_by_son) = dfs(node.left)
+        let (r_choose, r_by_father, r_by_son) = dfs(node.right)
+        
+        // 当前节点放置摄像头
+        let me_choose = min(l_choose, min(l_by_father, l_by_son)) + min(r_choose, min(r_by_father, r_by_son)) + 1
+        // 当前节点被父节点监控
+        let me_by_father = min(l_choose, l_by_son) + min(r_choose, r_by_son)
+        // 当前节点被子节点监控
+        let me_by_son = min(l_choose + r_by_son, min(l_by_son + r_choose, l_choose + r_choose))
+        
+        return (me_choose, me_by_father, me_by_son)
+    }
+    
+    let (root_choose, _, root_by_son) = dfs(root)
+    return min(root_choose, root_by_son)
+}
+// print(minCameraCover(createTreeFromMixed([0, 0, nil, 0, 0])))
