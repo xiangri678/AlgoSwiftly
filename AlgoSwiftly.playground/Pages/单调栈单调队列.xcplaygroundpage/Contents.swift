@@ -1,3 +1,4 @@
+// 单调栈
 // 739. 每日温度
 // 法 1：逆序遍历
 func dailyTemperatures_reverse_ordered(_ temperatures: [Int]) -> [Int] {
@@ -55,3 +56,27 @@ func trap(_ height: [Int]) -> Int {
     return ans
 }
 // print(trap([5,2,1,0,4,1,1,6]))
+
+// 单调队列
+// 239. 滑动窗口最大值
+func maxSlidingWindow(_ nums: [Int], _ k: Int) -> [Int] {
+    var ans = [Int]()
+    var window = [Int]()
+    for (i, num) in nums.enumerated() {
+        // 1. 入
+        while !window.isEmpty && num >= nums[window.last!] {
+            window.removeLast()  // 末尾元素小于新进元素，舍弃
+        }
+        window.append(i)
+        // 2. 出
+        if window[0] <= i - k {  // 已出窗口，删去
+            window.removeFirst()
+        }
+        // 3. 记
+        if i >= k - 1 {  // 达到窗口大小时才开始计数，最开始不记
+            ans.append(nums[window[0]])
+        }
+    }
+    return ans
+}
+// print(maxSlidingWindow([1,3,-1,-3,5,3,6,7], 3))
